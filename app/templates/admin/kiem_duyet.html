@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Kiểm duyệt sản phẩm ({{ products|length }} chờ duyệt)</h3>
+{% for p in products %}
+<div class="card mb-3 p-3">
+    <h5><a href="{{ url_for('product.detail', id=p.id) }}" target="_blank">{{ p.ten }}</a></h5>
+    <p>{{ p.mo_ta }}</p>
+    <p>Người đăng: {{ p.nguoi_dang.ho_ten }} — {{ "{:,.0f}".format(p.gia) }} đ/{{ p.don_vi_tinh }}</p>
+
+    <form action="{{ url_for('admin.duyet', id=p.id) }}" method="POST" class="d-inline">
+        <input type="hidden" name="ghi_chu" value="">
+        <button class="btn btn-success btn-sm">Duyệt</button>
+    </form>
+
+    <form action="{{ url_for('admin.tu_choi', id=p.id) }}" method="POST" class="d-inline">
+        <input type="text" name="ghi_chu" placeholder="Lý do từ chối" class="form-control d-inline-block w-auto">
+        <button class="btn btn-danger btn-sm">Từ chối</button>
+    </form>
+</div>
+{% else %}
+<p>Không có sản phẩm nào chờ duyệt.</p>
+{% endfor %}
+{% endblock %}

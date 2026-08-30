@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Thêm mốc truy xuất nguồn gốc — {{ product.ten }}</h3>
+<form method="POST" enctype="multipart/form-data">
+    <select name="loai_moc_id" class="form-select mb-2" required>
+        <option value="">-- Chọn giai đoạn --</option>
+        {% for lm in loai_mocs %}
+        <option value="{{ lm.id }}">{{ lm.ten }}</option>
+        {% endfor %}
+    </select>
+    <input name="ngay_thuc_hien" type="date" class="form-control mb-2" required>
+    <input name="dia_diem" class="form-control mb-2" placeholder="Địa điểm thực hiện">
+    <textarea name="mo_ta" class="form-control mb-2" placeholder="Mô tả chi tiết (VD: bón phân hữu cơ, tưới nước 2 lần/ngày...)"></textarea>
+    <input type="file" name="hinh_anh" class="form-control mb-2" accept="image/*">
+    <button class="btn btn-success">Lưu mốc</button>
+    <a href="{{ url_for('product.detail', id=product.id) }}" class="btn btn-secondary">Hủy</a>
+</form>
+{% endblock %}

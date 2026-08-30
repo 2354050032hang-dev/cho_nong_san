@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>🏡 Tạo Trang nông trại</h3>
+<form method="POST" enctype="multipart/form-data">
+    <input name="ten" class="form-control mb-2" placeholder="Tên nông trại" required>
+    <input name="dia_chi" class="form-control mb-2" placeholder="Địa chỉ">
+    <textarea name="mo_ta" class="form-control mb-2" placeholder="Giới thiệu về nông trại của bạn..."></textarea>
+    <input type="file" name="anh_bia" class="form-control mb-2" accept="image/*">
+    <button class="btn btn-success">Tạo Trang nông trại</button>
+</form>
+{% endblock %}

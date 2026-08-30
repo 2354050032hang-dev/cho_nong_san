@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Sửa Trang nông trại</h3>
+<form method="POST" enctype="multipart/form-data">
+    <input name="ten" class="form-control mb-2" value="{{ nong_trai.ten }}" required>
+    <input name="dia_chi" class="form-control mb-2" value="{{ nong_trai.dia_chi or '' }}">
+    <textarea name="mo_ta" class="form-control mb-2">{{ nong_trai.mo_ta or '' }}</textarea>
+    <input type="file" name="anh_bia" class="form-control mb-2" accept="image/*">
+    <button class="btn btn-warning">Cập nhật</button>
+    <a href="{{ url_for('farm.profile', id=nong_trai.id) }}" class="btn btn-secondary">Hủy</a>
+</form>
+{% endblock %}

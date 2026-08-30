@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block hero %}
+<section class="hero">
+    <div class="container hero__inner">
+        <div class="hero__text">
+            <span class="hero__eyebrow">Nông sản có nguồn gốc rõ ràng</span>
+            <h1>Từ nông trại đến bàn ăn,<br>minh bạch từng bước</h1>
+            <p>Mỗi sản phẩm trên Chợ Nông Sản đều có mã truy xuất nguồn gốc riêng — quét mã QR là biết ngay ai trồng, trồng ở đâu, thu hoạch khi nào.</p>
+            <div class="hero__actions">
+                <a href="#danh-sach" class="btn btn-success btn-lg">Xem sản phẩm</a>
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('product.create') }}" class="btn btn-outline-light btn-lg">+ Đăng tin bán</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="hero__art">
+            <svg viewBox="0 0 320 240" width="100%" role="img" aria-label="Minh họa hành trình từ nông trại đến người mua">
+                <g stroke="#F3EFDD" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round">
+                    <polygon points="30,110 60,80 90,110" fill="#F3EFDD" fill-opacity="0.18"/>
+                    <rect x="38" y="110" width="44" height="34"/>
+                    <rect x="52" y="124" width="16" height="20"/>
+                </g>
+                <path d="M100 130 Q 160 70 220 118" stroke="#C08A2E" stroke-width="2.5" stroke-dasharray="7 7" fill="none"/>
+                <g transform="translate(150,86)">
+                    <rect x="0" y="0" width="36" height="36" rx="4" fill="#F3EFDD"/>
+                    <path d="M5 5h9v9h-9zM22 5h9v9h-9zM5 22h9v9h-9zM24 24h4v4h-4zM30 24h3v3h-3zM24 30h3v3h-3z" fill="#B23A2E"/>
+                </g>
+                <g stroke="#F3EFDD" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round">
+                    <path d="M235,140 L295,140 L286,175 L244,175 Z" fill="#F3EFDD" fill-opacity="0.12"/>
+                    <path d="M248,140 Q 265,112 282,140"/>
+                </g>
+                <circle cx="255" cy="132" r="7" fill="#C08A2E"/>
+                <circle cx="268" cy="128" r="8" fill="#F3EFDD" fill-opacity="0.85"/>
+                <circle cx="280" cy="134" r="6" fill="#B23A2E" fill-opacity="0.8"/>
+            </svg>
+        </div>
+    </div>
+
+    <div class="container feature-row">
+        <div class="feature-item">
+            <div class="feature-icon">📷</div>
+            <div><strong>Quét QR tra cứu</strong><p>Xem ngay hành trình canh tác của sản phẩm</p></div>
+        </div>
+        <div class="feature-item">
+            <div class="feature-icon">🧑‍🌾</div>
+            <div><strong>Mua trực tiếp từ nông dân</strong><p>Không qua trung gian, giá tốt hơn</p></div>
+        </div>
+        <div class="feature-item">
+            <div class="feature-icon">⭐</div>
+            <div><strong>Đánh giá thực tế</strong><p>Nhận xét từ người mua đã trải nghiệm</p></div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block content %}
+<div id="danh-sach">
+<div class="category-row mb-3">
+    <a href="{{ url_for('product.index') }}" class="category-pill {% if not danh_muc_id %}active{% endif %}">
+        <span class="category-icon">🧺</span> Tất cả
+    </a>
+    {% set icons = {'Rau củ': '🥬', 'Trái cây': '🍊', 'Ngũ cốc': '🌾', 'Thủy sản': '🐟'} %}
+    {% for dm in danh_mucs %}
+    <a href="{{ url_for('product.index', danh_muc_id=dm.id) }}" class="category-pill {% if danh_muc_id == dm.id %}active{% endif %}">
+        <span class="category-icon">{{ icons.get(dm.ten, '🌱') }}</span> {{ dm.ten }}
+    </a>
+    {% endfor %}
+</div>
+
+<form method="GET" class="d-flex gap-2 mb-4">
+    <input type="hidden" name="danh_muc_id" value="{{ danh_muc_id or '' }}">
+    <input type="text" name="search" value="{{ search }}" class="form-control" placeholder="Tìm sản phẩm...">
+    <div class="form-check d-flex align-items-center">
+        <input type="checkbox" name="co_truy_xuat" value="1" class="form-check-input me-1" {% if co_truy_xuat %}checked{% endif %}>
+        <label class="form-check-label">Có truy xuất nguồn gốc</label>
+    </div>
+    <button class="btn btn-outline-success">Tìm</button>
+</form>
+
+<div class="row">
+{% for p in products %}
+<div class="col-md-4 mb-4">
+    <div class="card p-0 overflow-hidden">
+        <div class="thumb-wrap">
+            {% if p.hinh_anhs %}
+            <img src="{{ url_for('static', filename='uploads/' + p.hinh_anhs[0].duong_dan) }}" class="product-thumb">
+            {% else %}
+            <div class="product-thumb placeholder-thumb">
+                <svg viewBox="0 0 60 60" width="44" height="44"><path d="M30 8 C18 8 10 18 10 30 C10 42 18 52 30 52 C42 52 50 42 50 30 C50 18 42 8 30 8 Z" fill="none" stroke="#DDD3B8" stroke-width="2.5"/><path d="M30 20 L30 40 M20 30 L40 30" stroke="#DDD3B8" stroke-width="2.5" stroke-linecap="round"/></svg>
+            </div>
+            {% endif %}
+            <span class="thumb-tag">{{ p.danh_muc.ten }}</span>
+        </div>
+        <div class="p-2">
+            <a href="{{ url_for('product.detail', id=p.id) }}">{{ p.ten }}</a>
+            <p>{{ "{:,.0f}".format(p.gia) }} đ/{{ p.don_vi_tinh }}</p>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="empty-state text-center py-5">
+    <svg viewBox="0 0 120 100" width="100" class="mb-2">
+        <path d="M20,70 L40,30 L80,30 L100,70 Z" fill="none" stroke="#DDD3B8" stroke-width="3" stroke-linejoin="round"/>
+        <line x1="20" y1="70" x2="100" y2="70" stroke="#DDD3B8" stroke-width="3"/>
+        <text x="60" y="55" text-anchor="middle" font-size="28" fill="#DDD3B8">?</text>
+    </svg>
+    <p class="text-muted">Chưa có sản phẩm nào phù hợp.</p>
+</div>
+{% endfor %}
+</div>
+</div>
+{% endblock %}

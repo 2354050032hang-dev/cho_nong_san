@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+{% if nong_trai.anh_bia %}
+<img src="{{ url_for('static', filename='uploads/' + nong_trai.anh_bia) }}" class="w-100 rounded mb-3" style="max-height:220px; object-fit:cover;">
+{% endif %}
+
+<div class="d-flex justify-content-between align-items-start">
+    <div>
+        <h3>🏡 {{ nong_trai.ten }}</h3>
+        <p class="text-muted">{{ nong_trai.dia_chi or "Chưa cập nhật địa chỉ" }}</p>
+    </div>
+    {% if current_user.is_authenticated and current_user.id == nong_trai.tai_khoan_id %}
+    <a href="{{ url_for('farm.edit', id=nong_trai.id) }}" class="btn btn-outline-secondary btn-sm">Sửa trang</a>
+    {% endif %}
+</div>
+
+{% if nong_trai.mo_ta %}
+<div class="card p-3 mb-4"><p class="mb-0" style="white-space: pre-line;">{{ nong_trai.mo_ta }}</p></div>
+{% endif %}
+
+<h5>🌾 Sản phẩm đang bán ({{ san_phams|length }})</h5>
+<div class="row">
+{% for p in san_phams %}
+<div class="col-md-4 mb-3">
+    <div class="card p-2">
+        <a href="{{ url_for('product.detail', id=p.id) }}">{{ p.ten }}</a>
+        <p>{{ "{:,.0f}".format(p.gia) }} đ/{{ p.don_vi_tinh }}</p>
+    </div>
+</div>
+{% else %}
+<p class="text-muted">Nông trại chưa có sản phẩm nào đã duyệt.</p>
+{% endfor %}
+</div>
+{% endblock %}

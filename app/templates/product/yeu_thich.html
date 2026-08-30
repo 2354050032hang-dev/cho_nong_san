@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Sản phẩm yêu thích của tôi</h3>
+<div class="row">
+{% for p in products %}
+<div class="col-md-4 mb-3">
+    <div class="card p-2">
+        <a href="{{ url_for('product.detail', id=p.id) }}">{{ p.ten }}</a>
+        <p>{{ "{:,.0f}".format(p.gia) }} đ/{{ p.don_vi_tinh }}</p>
+    </div>
+</div>
+{% else %}
+<p>Bạn chưa lưu sản phẩm nào.</p>
+{% endfor %}
+</div>
+{% endblock %}

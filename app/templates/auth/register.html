@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Đăng ký</h3>
+<form method="POST">
+    <input name="ho_ten" class="form-control mb-2" placeholder="Họ tên" required>
+    <input name="email" type="email" class="form-control mb-2" placeholder="Email" required>
+    <select name="vai_tro_id" class="form-select mb-2">
+        {% for vt in vai_tro_list %}
+        <option value="{{ vt.id }}">{{ vt.ten_vai_tro }}</option>
+        {% endfor %}
+    </select>
+    <input name="password" type="password" class="form-control mb-2" placeholder="Mật khẩu" required>
+    <input name="confirm_password" type="password" class="form-control mb-2" placeholder="Xác nhận mật khẩu" required>
+    <button class="btn btn-success">Đăng ký</button>
+</form>
+<a href="{{ url_for('auth.login') }}">Đã có tài khoản? Đăng nhập</a>
+{% endblock %}

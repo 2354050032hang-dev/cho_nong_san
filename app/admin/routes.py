@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_required, current_user
 
 from app import db
-from app.models import SanPham, KiemDuyetSanPham
+from app.models import SanPham, KiemDuyetSanPham, TaiKhoan
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin", template_folder="../templates/admin")
 
@@ -59,3 +59,41 @@ def tu_choi(id):
 
     flash(f"Đã từ chối sản phẩm '{sp.ten}'.", "info")
     return redirect(url_for("admin.kiem_duyet"))
+@admin_bp.route("/tai-khoan")
+@admin_required
+def quan_ly_tai_khoan():
+    danh_sach = TaiKhoan.query.order_by(TaiKhoan.id.asc()).all()
+    return render_template("admin/tai_khoan.html", danh_sach=danh_sach)
+
+
+@admin_bp.route("/tai-khoan/<int:id>/khoa", methods=["POST"])
+@admin_required
+def khoa_tai_khoan(id):
+    tk = TaiKhoan.query.get_or_404(id)
+
+    if tk.id == current_user.id:
+        flash("Bạn không thể tự khóa chính mình.", "danger")
+        return redirect(url_for("admin.quan_ly_tai_khoan"))
+
+    tk.trang_thai = 0 if tk.trang_thai == 1 else 1
+    db.session.commit()
+
+    trang_thai_text = "khóa" if tk.trang_thai == 0 else "mở khóa"
+    flash(f"Đã {trang_thai_text} tài khoản '{tk.ho_ten}'.", "info")
+    return redirect(url_for("admin.quan_ly_tai_khoan"))
+
+
+@admin_bp.route("/tai-khoan/<int:id>/xoa", methods=["POST"])
+@admin_required
+def xoa_tai_khoan(id):
+    tk = TaiKhoan.query.get_or_404(id)
+
+    if tk.id == current_user.id:
+        flash("Bạn không thể tự xóa chính mình.", "danger")
+        return redirect(url_for("admin.quan_ly_tai_khoan"))
+
+    db.session.delete(tk)
+    db.session.commit()
+
+    flash(f"Đã xóa tài khoản '{tk.ho_ten}'.", "info")
+    return redirect(url_for("admin.quan_ly_tai_khoan"))

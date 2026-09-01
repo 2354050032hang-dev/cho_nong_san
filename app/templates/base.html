@@ -36,6 +36,7 @@
                         <li><a class="dropdown-item" href="{{ url_for('product.yeu_thich_list') }}">♥ Yêu thích</a></li>
                         {% if current_user.vai_tro_id == 1 %}
                         <li><a class="dropdown-item" href="{{ url_for('admin.kiem_duyet') }}">🛠️ Kiểm duyệt sản phẩm</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('admin.quan_ly_tai_khoan') }}">👤 Quản lý tài khoản</a></li>
                         {% endif %}
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">Đăng xuất</a></li>

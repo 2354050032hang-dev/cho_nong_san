@@ -56,6 +56,9 @@ def login():
         tk = TaiKhoan.query.filter_by(email=email).first()
 
         if tk and bcrypt.check_password_hash(tk.mat_khau, password):
+            if tk.trang_thai == 0:
+                flash("Tài khoản này đã bị khóa. Vui lòng liên hệ quản trị viên.", "danger")
+                return render_template("auth/login.html")
             login_user(tk)
             flash(f"Chào mừng {tk.ho_ten}!", "success")
             return redirect(url_for("product.index"))

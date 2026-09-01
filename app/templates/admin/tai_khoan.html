@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Quản lý tài khoản ({{ danh_sach|length }})</h3>
+<table class="table">
+<thead>
+<tr>
+    <th>ID</th><th>Họ tên</th><th>Email</th><th>Vai trò</th><th>Trạng thái</th><th></th>
+</tr>
+</thead>
+<tbody>
+{% for tk in danh_sach %}
+<tr>
+    <td>{{ tk.id }}</td>
+    <td>{{ tk.ho_ten }}</td>
+    <td>{{ tk.email }}</td>
+    <td>{{ tk.vai_tro.ten_vai_tro }}</td>
+    <td>
+        {% if tk.trang_thai == 1 %}
+        <span class="badge bg-success">Hoạt động</span>
+        {% else %}
+        <span class="badge bg-secondary">Đã khóa</span>
+        {% endif %}
+    </td>
+    <td>
+        {% if tk.id != current_user.id %}
+        <form action="{{ url_for('admin.khoa_tai_khoan', id=tk.id) }}" method="POST" class="d-inline">
+            <button class="btn btn-sm btn-outline-warning">
+                {% if tk.trang_thai == 1 %}Khóa{% else %}Mở khóa{% endif %}
+            </button>
+        </form>
+        <form action="{{ url_for('admin.xoa_tai_khoan', id=tk.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Xóa vĩnh viễn tài khoản này? Toàn bộ sản phẩm, bình luận liên quan cũng sẽ bị xóa.');">
+            <button class="btn btn-sm btn-outline-danger">Xóa</button>
+        </form>
+        {% else %}
+        <span class="text-muted">(Bạn)</span>
+        {% endif %}
+    </td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% endblock %}

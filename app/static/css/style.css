@@ -286,3 +286,90 @@ body {
   border-radius: 6px; padding: 10px 14px;
 }
 .timeline-img { max-width: 160px; border-radius: 4px; margin-top: 6px; }
+/* =========================================
+   TRA CỨU NGUỒN GỐC
+========================================= */
+
+.trace-search-box {
+    margin-bottom: 25px;
+    padding: 20px;
+
+    background: #fffdf5;
+
+    border: 1px solid #ded3b7;
+    border-left: 5px solid #397348;
+
+    border-radius: 12px;
+}
+
+.trace-search-header h4 {
+    margin: 0 0 5px;
+
+    color: #275a39;
+
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.trace-search-header p {
+    margin: 0 0 15px;
+
+    color: #6c6657;
+}
+
+.trace-search-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.trace-search-form input {
+    flex: 1;
+    min-height: 45px;
+}
+
+.trace-search-form button {
+    min-height: 45px;
+    white-space: nowrap;
+}
+
+
+/* CAMERA QR */
+
+#qr-reader-box {
+    margin-top: 20px;
+    padding: 15px;
+
+    max-width: 500px;
+
+    background: white;
+
+    border: 1px solid #ded3b7;
+
+    border-radius: 10px;
+}
+
+.qr-title {
+    font-weight: 600;
+    color: #275a39;
+}
+
+#qr-reader {
+    width: 100%;
+}
+
+
+/* Điện thoại */
+
+@media (max-width: 768px) {
+
+    .trace-search-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .trace-search-form button {
+        width: 100%;
+    }
+
+}

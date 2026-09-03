@@ -55,7 +55,73 @@
 {% endblock %}
 
 {% block content %}
+
+<!-- ================================================== -->
+<!-- TRA CỨU NGUỒN GỐC -->
+<!-- ================================================== -->
+
+<div class="trace-search-box">
+
+    <div class="trace-search-header">
+        <h4>🔎 Tra cứu nguồn gốc</h4>
+        <p>Nhập mã truy xuất hoặc quét mã QR của sản phẩm để xem hành trình sản xuất.</p>
+    </div>
+
+    <form action="{{ url_for('product.tra_cuu') }}"
+          method="GET"
+          class="trace-search-form">
+
+        <input
+            type="text"
+            name="ma"
+            class="form-control"
+            placeholder="Nhập mã truy xuất, ví dụ: NS-9GWLC116"
+            autocomplete="off"
+            required
+        >
+
+        <button type="submit" class="btn btn-success">
+            🔍 Tra cứu
+        </button>
+
+        <button
+            type="button"
+            class="btn btn-outline-success"
+            onclick="moTrinhQuetQR()"
+        >
+            📷 Quét QR
+        </button>
+
+    </form>
+
+    <!-- Camera quét QR -->
+    <div id="qr-reader-box" style="display:none;">
+
+        <p class="qr-title">
+            Đưa mã QR của sản phẩm trước camera
+        </p>
+
+        <div id="qr-reader"></div>
+
+        <button
+            type="button"
+            class="btn btn-sm btn-outline-secondary mt-2"
+            onclick="dongTrinhQuetQR()"
+        >
+            ✕ Đóng camera
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- ================================================== -->
+<!-- DANH SÁCH SẢN PHẨM -->
+<!-- ================================================== -->
+
 <div id="danh-sach">
+
 <div class="category-row mb-3">
     <a href="{{ url_for('product.index') }}" class="category-pill {% if not danh_muc_id %}active{% endif %}">
         <span class="category-icon">🧺</span> Tất cả
@@ -84,7 +150,13 @@
     <div class="card p-0 overflow-hidden">
         <div class="thumb-wrap">
             {% if p.hinh_anhs %}
-            <img src="{{ url_for('static', filename='uploads/' + p.hinh_anhs[0].duong_dan) }}" class="product-thumb">
+                {% set img_url = p.hinh_anhs[0].duong_dan %}
+                {% if img_url.startswith('http://') or img_url.startswith('https://') %}
+                    <img src="{{ img_url }}" class="product-thumb">
+                {% else %}
+                    <img src="{{ url_for('static', filename='uploads/' + img_url) }}"
+                        class="product-thumb">
+                {% endif %}
             {% else %}
             <div class="product-thumb placeholder-thumb">
                 <svg viewBox="0 0 60 60" width="44" height="44"><path d="M30 8 C18 8 10 18 10 30 C10 42 18 52 30 52 C42 52 50 42 50 30 C50 18 42 8 30 8 Z" fill="none" stroke="#DDD3B8" stroke-width="2.5"/><path d="M30 20 L30 40 M20 30 L40 30" stroke="#DDD3B8" stroke-width="2.5" stroke-linecap="round"/></svg>
@@ -110,4 +182,225 @@
 {% endfor %}
 </div>
 </div>
+
+
+<!-- ================================================== -->
+<!-- THƯ VIỆN QUÉT QR LOCAL -->
+<!-- ================================================== -->
+
+<script src="{{ url_for('static', filename='js/html5-qrcode.min.js') }}"></script>
+
+
+<script>
+
+let qrScanner = null;
+
+
+/* ==========================================
+   MỞ CAMERA
+========================================== */
+
+function moTrinhQuetQR() {
+
+    const box = document.getElementById("qr-reader-box");
+
+    box.style.display = "block";
+
+
+    // Nếu camera đã chạy thì không tạo thêm
+    if (qrScanner !== null) {
+        return;
+    }
+
+
+    qrScanner = new Html5Qrcode("qr-reader");
+
+
+    Html5Qrcode.getCameras()
+
+        .then(cameras => {
+
+            if (!cameras || cameras.length === 0) {
+
+                alert("Không tìm thấy camera trên thiết bị.");
+
+                qrScanner = null;
+
+                return;
+            }
+
+
+            // Ưu tiên camera cuối cùng trong danh sách
+            const cameraId = cameras[cameras.length - 1].id;
+
+
+            qrScanner.start(
+
+                cameraId,
+
+                {
+                    fps: 10,
+
+                    qrbox: {
+                        width: 250,
+                        height: 250
+                    }
+                },
+
+
+                // Khi quét thành công
+                function(decodedText) {
+
+                    xuLyMaQR(decodedText);
+
+                },
+
+
+                // Khi chưa đọc được QR thì bỏ qua
+                function(errorMessage) {
+
+                }
+
+            );
+
+        })
+
+        .catch(error => {
+
+            console.error(error);
+
+            alert(
+                "Không thể mở camera. Vui lòng cho phép trình duyệt sử dụng camera."
+            );
+
+            qrScanner = null;
+
+        });
+
+}
+
+
+
+/* ==========================================
+   XỬ LÝ NỘI DUNG QR
+========================================== */
+
+function xuLyMaQR(decodedText) {
+
+    if (!decodedText) {
+        return;
+    }
+
+
+    decodedText = decodedText.trim();
+
+
+    // QR chứa một đường dẫn
+    if (
+        decodedText.startsWith("http://") ||
+        decodedText.startsWith("https://")
+    ) {
+
+        dungCameraVaChuyenTrang(decodedText);
+
+        return;
+
+    }
+
+
+    // QR chỉ chứa mã truy xuất
+    const urlTraCuu =
+        "{{ url_for('product.tra_cuu') }}"
+        + "?ma="
+        + encodeURIComponent(decodedText);
+
+
+    dungCameraVaChuyenTrang(urlTraCuu);
+
+}
+
+
+
+/* ==========================================
+   DỪNG CAMERA VÀ CHUYỂN TRANG
+========================================== */
+
+function dungCameraVaChuyenTrang(url) {
+
+    if (qrScanner !== null) {
+
+        qrScanner.stop()
+
+            .then(() => {
+
+                qrScanner.clear();
+
+                qrScanner = null;
+
+                window.location.href = url;
+
+            })
+
+            .catch(() => {
+
+                window.location.href = url;
+
+            });
+
+    }
+
+    else {
+
+        window.location.href = url;
+
+    }
+
+}
+
+
+
+/* ==========================================
+   ĐÓNG CAMERA
+========================================== */
+
+function dongTrinhQuetQR() {
+
+    const box = document.getElementById("qr-reader-box");
+
+
+    if (qrScanner === null) {
+
+        box.style.display = "none";
+
+        return;
+
+    }
+
+
+    qrScanner.stop()
+
+        .then(() => {
+
+            qrScanner.clear();
+
+            qrScanner = null;
+
+            box.style.display = "none";
+
+        })
+
+        .catch(error => {
+
+            console.error(error);
+
+            qrScanner = null;
+
+            box.style.display = "none";
+
+        });
+
+}
+
+</script>
+
 {% endblock %}

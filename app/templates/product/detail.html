@@ -34,17 +34,39 @@
 {% endif %}
 
 {% if product.hinh_anhs and product.hinh_anhs[0].duong_dan %}
+
+    {% set img_url = product.hinh_anhs[0].duong_dan %}
+
     <div class="mt-3">
-        <img
-            src="{{ url_for('static', filename='uploads/' + product.hinh_anhs[0].duong_dan) }}"
-            style="max-width:300px;"
-            alt="{{ product.ten }}"
-        >
+
+        {% if img_url.startswith('http://') or img_url.startswith('https://') %}
+
+            <!-- Ảnh mới lưu trên Cloudinary -->
+            <img
+                src="{{ img_url }}"
+                style="max-width:300px;"
+                alt="{{ product.ten }}"
+            >
+
+        {% else %}
+
+            <!-- Ảnh cũ vẫn lưu trong static/uploads -->
+            <img
+                src="{{ url_for('static', filename='uploads/' + img_url) }}"
+                style="max-width:300px;"
+                alt="{{ product.ten }}"
+            >
+
+        {% endif %}
+
     </div>
+
 {% else %}
+
     <div class="mt-3 text-muted">
         Chưa có hình ảnh sản phẩm.
     </div>
+
 {% endif %}
 
 <br>

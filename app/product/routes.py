@@ -2,15 +2,23 @@ import os
 import secrets
 import string
 import qrcode
+import cloudinary
+import cloudinary.uploader
+from dotenv import load_dotenv
 from datetime import datetime
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_required, current_user
-
 from app import db
 from app.models import (SanPham,DanhMuc,MaTruyXuat,MaQR,HinhAnhSanPham,YeuThich,MocTruyXuat,LoaiMocTruyXuat)
 product_bp = Blueprint("product", __name__, template_folder="../templates/product")
 
-
+load_dotenv()
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
+    secure=True
+)
 def sinh_ma_truy_xuat():
     while True:
         suffix = "".join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(8))
@@ -20,15 +28,40 @@ def sinh_ma_truy_xuat():
 
 
 def luu_anh(file):
-    if file and file.filename:
-        ext = file.filename.rsplit(".", 1)[-1].lower()
-        if ext in {"png", "jpg", "jpeg", "webp"}:
-            filename = f"{secrets.token_hex(8)}.{ext}"
-            filepath = os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
-            file.save(filepath)
-            return filename
-    return None
+    if not file or not file.filename:
+        print("KHÔNG NHẬN ĐƯỢC FILE ẢNH")
+        return None
 
+    if "." not in file.filename:
+        print("FILE KHÔNG CÓ PHẦN MỞ RỘNG")
+        return None
+
+    ext = file.filename.rsplit(".", 1)[1].lower()
+
+    if ext not in {"png", "jpg", "jpeg", "webp"}:
+        print("ĐỊNH DẠNG ẢNH KHÔNG HỢP LỆ:", ext)
+        return None
+
+    try:
+        print("Đang upload ảnh:", file.filename)
+
+        result = cloudinary.uploader.upload(
+            file,
+            folder="cho_nong_san/san_pham",
+            resource_type="image"
+        )
+
+        url = result["secure_url"]
+
+        print("UPLOAD CLOUDINARY THÀNH CÔNG")
+        print(url)
+
+        return url
+
+    except Exception as e:
+        print("LỖI CLOUDINARY:")
+        print(e)
+        return None
 
 def sinh_qr(san_pham_id, gia_tri_ma):
     qr_folder = os.path.join(current_app.config["UPLOAD_FOLDER"], "qrcodes")
@@ -121,7 +154,7 @@ def create():
 
     return render_template("product/create.html", danh_mucs=danh_mucs)
 @product_bp.route("/truy-xuat/<ma>")
-def tra_cuu(ma):
+def tra_cuu_duong_dan(ma):
     mtx = MaTruyXuat.query.filter_by(gia_tri_ma=ma).first()
     if not mtx:
         flash("Không tìm thấy sản phẩm với mã này.", "danger")
@@ -259,3 +292,33 @@ def xoa_moc(moc_id):
 
     flash("Đã xóa mốc truy xuất.", "info")
     return redirect(url_for("product.detail", id=san_pham_id))
+@product_bp.route('/tra-cuu')
+def tra_cuu():
+    # Lấy mã truy xuất người dùng nhập
+    ma = request.args.get('ma', '').strip().upper()
+
+    # Không nhập mã
+    if not ma:
+        flash('Vui lòng nhập mã truy xuất.', 'warning')
+        return redirect(url_for('product.index'))
+
+    # Tìm mã trong cơ sở dữ liệu
+    ma_truy_xuat = MaTruyXuat.query.filter_by(
+        gia_tri_ma=ma
+    ).first()
+
+    # Không tìm thấy
+    if not ma_truy_xuat:
+        flash(
+            'Không tìm thấy sản phẩm với mã truy xuất này.',
+            'danger'
+        )
+        return redirect(url_for('product.index'))
+
+    # Tìm thấy → chuyển đến trang chi tiết sản phẩm
+    return redirect(
+        url_for(
+            'product.detail',
+            id=ma_truy_xuat.san_pham_id
+        )
+    )
